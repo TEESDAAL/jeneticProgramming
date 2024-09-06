@@ -62,11 +62,16 @@ public class GeneticProgramming {
         }
         System.out.println("Average Progression: " + populationAverages);
 
+        var bestProgram = population.parallelStream()
+                .min(Comparator.comparingDouble(m->ErrorFunctions.<TreeGP>absoluteError(points, function).apply(m)))
+                .get();
+        System.out.println("x = " + pointsWithinRange(-10, 10, 5000));
+        System.out.println("y = "+ pointsWithinRange(-10, 10, 5000).stream().map(bestProgram::evaluate).toList());
     }
 
 
     static List<Double> pointsWithinRange(int lowerBound, int upperBound, int numberOfPoints) {
-        return IntStream.range(0, numberOfPoints).mapToObj(i -> lowerBound + upperBound/ (double) numberOfPoints).toList();
+        return IntStream.range(0, numberOfPoints).mapToObj(i -> lowerBound + i*Math.abs(lowerBound-upperBound)/ (double) numberOfPoints).toList();
     }
 
     private static <E extends Expression<E>> void populationStatistics(List<E> population, Function<Expression<E>, Double> fitnessFunction) {
