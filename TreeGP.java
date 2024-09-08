@@ -65,15 +65,18 @@ abstract public class TreeGP implements Expression<TreeGP> {
         return copy(Optional.empty());
     }
 
+    /**
+     * Copy a specific tree node
+     * @param parent
+     * @return
+     */
     protected abstract TreeGP copy(Optional<Node> parent);
 
     @Override
     public TreeGP crossOver(TreeGP other) {
-        TreeGP mainParent = this.copy();
-        TreeGP otherParent = this.copy();
+        TreeGP mainSwapPoint = this.selectRandomNode();
+        TreeGP otherSwapPoint = other.selectRandomNode();
 
-        TreeGP mainSwapPoint = mainParent.selectRandomNode();
-        TreeGP otherSwapPoint = otherParent.selectRandomNode();
 
         if (mainSwapPoint.parent().isEmpty()) {
             otherSwapPoint.updateParent(Optional.empty());
@@ -83,13 +86,26 @@ abstract public class TreeGP implements Expression<TreeGP> {
         otherSwapPoint.updateParent(mainSwapPoint.parent());
 
         mainSwapPoint.parent.get().replaceChild(mainSwapPoint, otherSwapPoint);
-        return mainParent;
+        return this;
     }
 
+    /**
+     * Select a non-uniform random node from the tree, weighted towards non-terminals
+     * has an 80% chance to select a non-terminal
+     * @return A random node in the tree.
+     */
     private TreeGP selectRandomNode() {
-        return GeneticProgramming.choose(toStream().toList());
+        boolean selectNonTerminal = Math.random() < 0.8;
+        if (selectNonTerminal && toStream().anyMatch(e -> !(e instanceof TerminalExpression))) {
+            return GeneticProgramming.choose(toStream().filter(e -> !(e instanceof TerminalExpression)).toList());
+        } else {
+            return GeneticProgramming.choose(toStream().filter(e -> e instanceof TerminalExpression).toList());
+        }
     }
 
+    /**
+     * @return A stream containing all the nodes in the tree.
+     */
     protected abstract Stream<TreeGP> toStream();
 
 
@@ -98,5 +114,8 @@ abstract public class TreeGP implements Expression<TreeGP> {
         return this.string();
     }
 
+    /**
+     * @return the string representation of this node
+     */
     abstract String string();
 }

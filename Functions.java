@@ -6,8 +6,8 @@ public enum Functions {
     Sub((a, b) -> a - b),
     Div(Functions::safeDivision),
     Mul((a, b) -> a * b),
-    //Min(Math::min),
-    //Max(Math::max)
+    Min(Math::min),
+    Max(Math::max)
     ;
 
     static Functions randFunction() {
